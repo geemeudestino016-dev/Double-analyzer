@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DoubleAnalyzer</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#071019;color:#f5f7fa;font:14px Arial,sans-serif}
+header{height:66px;background:#0b1622;border-bottom:1px solid #24364b;display:flex;align-items:center;padding:0 18px;gap:28px;position:sticky;top:0;z-index:5}
+.brand{font-size:22px;font-weight:800;white-space:nowrap}.brand b{color:#25a7ff}
+nav{display:flex;gap:6px;height:100%;align-items:center}nav button{background:none;border:0;color:#d6dde7;padding:11px 14px;border-radius:7px;font-size:14px}nav button.active,nav button:hover{background:#0d4e88;color:#fff}
+.live{margin-left:auto;background:#b91d2c;padding:9px 13px;border-radius:8px;font-weight:bold}.live i{display:inline-block;width:8px;height:8px;background:#25e16f;border-radius:50%;margin-right:6px}
+main{padding:16px;max-width:1600px;margin:auto}.tiles{display:grid;grid-template-columns:repeat(10,1fr);gap:8px}.tile{background:#101923;border:1px solid #2d3d4e;border-radius:7px;padding:10px;text-align:center}.tile.hot{border-color:#e21d36;background:#321117}.tile .n{font-size:20px;font-weight:bold}.tile .bars{height:28px;margin:5px auto;display:flex;align-items:end;justify-content:center;gap:2px}.bar{width:6px;background:#1ddc72}.bar.r{background:#ef233c}.tile small{display:block;margin-top:3px;color:#dce2ea}
+.cards{display:grid;grid-template-columns:1fr 1fr 1fr 1.25fr 1.25fr 1.25fr;gap:9px;margin-top:10px}.card{background:#0e1822;border:1px solid #293b4e;border-radius:9px;padding:12px}.metric{font-size:34px;font-weight:800;margin-top:5px}.redcard{background:linear-gradient(135deg,#e0172d,#7d0917)}.whitecard{background:#e9edf0;color:#15191d}.whitecard small{color:#444}.blackcard{background:#17191c}
+.panel{background:#0c1620;border:1px solid #293b4e;border-radius:9px;margin-top:10px;padding:12px}.charthead{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}.legend span{margin-right:15px}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}.chart{height:260px;width:100%;display:block;background:#09121a;border-radius:6px}
+.two{display:grid;grid-template-columns:1fr 330px;gap:10px}.results{max-height:260px;overflow:auto}.result{display:grid;grid-template-columns:1fr 50px 55px;gap:8px;padding:7px;border-bottom:1px solid #243241;align-items:center}.pill{border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-weight:bold}.rp{background:#e51d3c}.bp{background:#24292e;border:1px solid #8993a0}.wp{background:#eee;color:#222}
+.tabs{display:flex;gap:5px;margin-bottom:10px}.tabs button{background:#152333;color:#cdd6e0;border:1px solid #2b3e52;padding:9px 13px;border-radius:7px}.tabs button.active{background:#0879dc;color:#fff}.matrix{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;overflow:auto}.m{height:27px;border-radius:4px;background:#222b35;display:flex;align-items:center;justify-content:center;font-size:10px}.mr{background:#e51d3c}.mw{background:#eee;color:#222}.status{color:#70eea2;font-size:12px}.foot{color:#8e9aaa;font-size:11px;padding:10px 2px}
+@media(max-width:900px){header{overflow:auto}.tiles{grid-template-columns:repeat(5,110px);overflow:auto}.cards{grid-template-columns:repeat(3,1fr)}.two{grid-template-columns:1fr}.brand{font-size:18px}nav button{padding:8px}}
+</style></head>
+<body>
+<header><div class="brand">🎲 Double<b>Analyzer</b></div><nav>
+<button class="active" onclick="tab(this,'dashboard')">⌂ Dashboard</button><button onclick="tab(this,'chart')">⌁ Gráfico</button><button onclick="tab(this,'dev')">▦ Devedoras</button><button onclick="tab(this,'stats')">▥ Estatísticas</button><button onclick="tab(this,'patterns')">⚙ Padrões</button>
+</nav><div class="live"><i></i> AO VIVO</div><span id="clock"></span></header>
+<main id="dashboard">
+<section class="tiles" id="tiles"></section>
+<section class="cards">
+<div class="card redcard"><small>Sequência Vermelho</small><div class="metric" id="sr">3</div><small>Maior: 12</small></div>
+<div class="card blackcard"><small>Sequência Preto</small><div class="metric" id="sb">1</div><small>Maior: 10</small></div>
+<div class="card whitecard"><small>Sequência Branco</small><div class="metric">0</div><small>Maior: 4</small></div>
+<div class="card"><small>Totais (Hoje)</small><div class="metric">206 / 214 / 28</div><small>46,0% / 47,7% / 6,3%</small></div>
+<div class="card"><small>Últimas 100</small><div class="metric">46 / 43 / 11</div><small>Vermelho / Preto / Branco</small></div>
+<div class="card"><small>Próxima rodada</small><div class="metric" id="timer">7s</div><small>temporizador visual</small></div>
+</section>
+<section class="panel"><div class="charthead"><b>Gráfico de resultados</b><span class="status">● Captura pronta para fonte de dados</span></div>
+<div class="legend"><span>🔴 Vermelho</span><span>⚫ Preto</span><span>⚪ Branco</span><span>— Tendência</span></div>
+<canvas class="chart" id="chart"></canvas></section>
+<section class="two">
+<div class="panel"><div class="tabs"><button class="active">Grade Principal</button><button>Colunas Devedoras</button><button>Bead Road</button><button>Big Road</button></div><div class="matrix" id="matrix"></div></div>
+<div class="panel"><b>Últimos resultados</b><div class="results" id="results"></div></div>
+</section>
+<div class="foot">Os dados exibidos nesta versão são demonstrativos. A atualização real depende de uma fonte/API autorizada do jogo.</div>
+</main>
+<section id="chart" style="display:none"></section><section id="dev" style="display:none"></section><section id="stats" style="display:none"></section><section id="patterns" style="display:none"></section>
+<script>
+const nums=[5,2,8,0,6,1,4,9,7,8,1,2,6,4,5,0,3,8,7,6,4,9,2,5,6,1,8,3,7,4,5,2,9,6,8,1,4,7,5,3,8,6,2,4,9,7,5,8];
+const color=n=>n===0?'w':n<=7?'r':'b';
+function render(){
+document.getElementById('tiles').innerHTML=[0,1,2,3,4,5,6,7,8,9].map(n=>`<div class="tile ${n===5||n===8?'hot':''}"><div class="n">${n}</div><div class="bars">${Array.from({length:9},(_,i)=>`<i class="bar ${i%3===0?'r':''}" style="height:${7+(i+n)%20}px"></i>`).join('')}</div><small>SL: ${7+n*2}</small><small>SA: ${n%9}</small></div>`).join('');
+document.getElementById('results').innerHTML=nums.slice(0,15).map((n,i)=>`<div class="result"><span>#${2321401-i}</span><span class="pill ${color(n)==='r'?'rp':color(n)==='w'?'wp':'bp'}">${n}</span><span>23:${58-i<10?'0':''}${58-i}</span></div>`).join('');
+document.getElementById('matrix').innerHTML=Array.from({length:144},(_,i)=>{let n=nums[i%nums.length];return `<div class="m ${color(n)==='r'?'mr':color(n)==='w'?'mw':''}">${n}</div>`}).join('');
+}
+function draw(){
+const c=document.getElementById('chart'),ctx=c.getContext('2d'),d=devicePixelRatio||1,w=c.clientWidth,h=c.clientHeight;c.width=w*d;c.height=h*d;ctx.scale(d,d);
+ctx.strokeStyle='#223445';for(let y=20;y<h;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+ctx.strokeStyle='#168bea';ctx.lineWidth=2;ctx.beginPath();nums.forEach((n,i)=>{let x=8+i*(w-16)/(nums.length-1),y=h-20-(n/9)*(h-45);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+nums.forEach((n,i)=>{let x=8+i*(w-16)/(nums.length-1),y=h-20-(n/9)*(h-45);ctx.fillStyle=color(n)==='r'?'#ef233c':color(n)==='w'?'#eee':'#35dc7a';ctx.fillRect(x-3,y-3,6,6)})
+}
+function tab(btn,id){document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.getElementById('dashboard').style.display=id==='dashboard'?'block':'none';}
+let t=7;setInterval(()=>{t=t<=0?7:t-1;document.getElementById('timer').textContent=t+'s'},1000);
+function clock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('pt-BR',{hour12:false})}clock();setInterval(clock,1000);render();draw();addEventListener('resize',draw);
+</script></body></html>
